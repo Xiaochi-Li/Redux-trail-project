@@ -237,7 +237,13 @@
       <ul>
         {props.items.map((item) => (
           <li key={item.id}>
-            {item.name}
+            <span
+              onClick={() => props.toggleItem(item)}
+              style={{textDecoration: item.complete ? 'line-through' : 'none'}}
+            >
+              {item.name}
+            </span>
+            <button onClick={() => props.removeItem(item)}>X</button>
           </li>
         ))}
       </ul>
@@ -257,6 +263,15 @@
       }))
     };
 
+    removeItem = (todo) => {
+      this.props.store.dispatch(removeTodoAction(todo.id))
+    };
+
+
+    toggleItem = (todo) => {
+      this.props.store.dispatch(toggleTodoAction(todo.id));
+    };
+
     render() {
       return (
         <div>
@@ -267,7 +282,11 @@
             ref={(input) => this.input = input}
           />
           <button onClick={this.addItem}>Add Todo</button>
-          <List items={this.props.todos}/>
+          <List
+            items={this.props.todos}
+            removeItem={this.removeItem}
+            toggleItem={this.toggleItem}
+          />
         </div>
       )
     }
@@ -286,6 +305,10 @@
       }))
     };
 
+    removeItem = (goal) => {
+      this.props.store.dispatch(removeGoalAction(goal.id))
+    };
+
     render() {
       return (
         <div>
@@ -296,13 +319,23 @@
             ref={(input) => this.input = input}
           />
           <button onClick={this.addItem}>Add Goal</button>
-          <List items={this.props.goals}/>
+          <List
+            items={this.props.goals}
+            removeItem={this.removeItem}
+          />
         </div>
       )
     }
   }
 
   class App extends React.Component {
+    componentDidMount() {
+      const {store} = this.props;
+
+      //subscribe to run a forceUpdate. when the state tree is updated, a rerender is forced
+      store.subscribe(() => this.forceUpdate())
+    }
+
     render() {
       const {store} = this.props;
       const {todos, goals} = store.getState();
